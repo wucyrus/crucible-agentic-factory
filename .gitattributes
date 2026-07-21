@@ -1,0 +1,26 @@
+# Default behavior: normalize text files to LF in the repository.
+* text=auto eol=lf
+
+# Windows scripts keep CRLF for better local execution ergonomics.
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Linux and infra/runtime scripts should stay LF.
+*.sh text eol=lf
+*.service text eol=lf
+
+# Source and config files use LF for consistency across environments.
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.py text eol=lf
+
+# Binary assets.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.pdf binary
+*.map text eol=lf

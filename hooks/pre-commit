@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+set -eu
+
+ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+GITLEAKS="$ROOT_DIR/tools/gitleaks/gitleaks.exe"
+
+if [ ! -x "$GITLEAKS" ]; then
+  echo "Error: gitleaks binary not found at $GITLEAKS" >&2
+  echo "Install from zip into tools/gitleaks or update hook path." >&2
+  exit 1
+fi
+
+exec "$GITLEAKS" protect --staged --redact --verbose --config "$ROOT_DIR/.gitleaks.toml"

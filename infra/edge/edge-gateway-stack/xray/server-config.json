@@ -1,0 +1,38 @@
+{
+  "log": {
+    "loglevel": "${XRAY_LOG_LEVEL}"
+  },
+  "inbounds": [
+    {
+      "listen": "127.0.0.1",
+      "port": 8080,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "${CLIENT_UUID}",
+            "email": "user@${DOMAIN}"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "xhttpSettings": {
+          "path": "${XHTTP_PATH}",
+          "mode": "packet-up"
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "block"
+    }
+  ]
+}

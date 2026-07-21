@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Telemetry & API Gateway Services</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --ok: #4ade80;
+      --accent: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 2rem;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background:
+        radial-gradient(1000px 500px at 20% -10%, rgba(56, 189, 248, 0.22), transparent 60%),
+        radial-gradient(900px 500px at 120% 110%, rgba(74, 222, 128, 0.14), transparent 60%),
+        var(--bg);
+      color: var(--text);
+    }
+    .card {
+      width: min(640px, 100%);
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.92));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 16px 40px rgba(2, 6, 23, 0.45);
+    }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--ok);
+      background: rgba(74, 222, 128, 0.12);
+      border: 1px solid rgba(74, 222, 128, 0.28);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ok);
+      box-shadow: 0 0 10px rgba(74, 222, 128, 0.6);
+    }
+    h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+      color: var(--accent);
+      letter-spacing: 0.01em;
+    }
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="status"><span class="dot"></span>All Systems Operational</div>
+    <h1>Enterprise Edge Gateway</h1>
+    <p>
+      This edge endpoint provides automated ingress and telemetry collection for cluster services.
+      API access requires token authorization.
+    </p>
+  </main>
+</body>
+</html>

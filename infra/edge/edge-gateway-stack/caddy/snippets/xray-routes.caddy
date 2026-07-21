@@ -1,0 +1,62 @@
+(xray_routes) {
+    log {
+        level {$CADDY_ACCESS_LOG_LEVEL}
+        output file /var/log/caddy/access.log {
+            roll_size 10MiB
+            roll_keep 10
+            roll_keep_for 720h
+        }
+        format json
+    }
+
+    @valid_xhttp {
+        path {$XHTTP_PATH}*
+        header X-App-Auth {$XHTTP_AUTH_HEADER}
+    }
+
+    @scanner_probe {
+        path {$XHTTP_PATH}*
+        not header X-App-Auth {$XHTTP_AUTH_HEADER}
+    }
+
+    @scanner_bait {
+        path /.env* /.git* /.svn* /.aws* /*config*.json /*.bak
+        path /wp-admin* /wp-login.php /xmlrpc.php /admin* /administrator* /phpmyadmin* /pma*
+        path /swagger* /v2/api-docs* /actuator* /graphql*
+        path /cgi-bin* /console* /solr* /vendor/phpunit* /shell.php /cmd.php
+    }
+
+    handle @valid_xhttp {
+        reverse_proxy 127.0.0.1:8080 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            flush_interval -1
+        }
+    }
+
+    handle @scanner_probe {
+        reverse_proxy 127.0.0.1:9090 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up User-Agent {header.User-Agent}
+            header_up Host {host}
+            header_up X-Original-URI {uri}
+        }
+    }
+
+    handle @scanner_bait {
+        reverse_proxy 127.0.0.1:9090 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up User-Agent {header.User-Agent}
+            header_up Host {host}
+            header_up X-Original-URI {uri}
+        }
+    }
+
+    handle {
+        root * /var/www/honeypot
+        file_server
+        try_files {path} /index.html
+    }
+}

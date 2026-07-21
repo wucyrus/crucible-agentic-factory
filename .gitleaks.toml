@@ -1,0 +1,14 @@
+title = "crucible-agentic-factory gitleaks config"
+
+[[rules]]
+id = "x-app-auth-header"
+description = "Detect committed X-App-Auth header values"
+path = '''infra/edge/edge-gateway-stack/xray/output/.*\.json'''
+regex = '''(?i)"X-App-Auth"\s*:\s*"[^"]+"'''
+tags = ["key", "header", "auth", "xray"]
+
+[allowlist]
+description = "Allow template placeholders and git metadata"
+paths = [
+  '''^\.git/'''
+]

@@ -1,0 +1,7 @@
+salary/
+salary-domain.caddy
+config.json
+
+# Rendered runtime outputs should not be committed
+xray/output/*.json
+!xray/output/.gitkeep

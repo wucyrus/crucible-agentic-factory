@@ -1,0 +1,11 @@
+{
+  "name": "crucible-agentic-factory",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Monorepo for an evolvable agentic engineering system",
+  "scripts": {
+    "lint": "echo \"No lint configured yet\"",
+    "test": "echo \"No tests configured yet\"",
+    "verify": "echo \"No verify pipeline configured yet\""
+  }
+}

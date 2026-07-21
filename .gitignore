@@ -1,0 +1,40 @@
+.DS_Store
+Thumbs.db
+
+# Editor and workspace state
+.vscode/
+.idea/
+*.code-workspace
+
+# Node / web build outputs
+node_modules/
+dist/
+build/
+coverage/
+
+# Python / general caches
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+
+# Logs and generated runtime artifacts
+*.log
+*.csv
+infra/edge/edge-gateway-stack/log/
+infra/edge/edge-gateway-stack/tarpit-raw.log
+infra/edge/edge-gateway-stack/tarpit-events.csv
+infra/edge/edge-gateway-stack/xray/output/*.json
+!infra/edge/edge-gateway-stack/xray/output/.gitkeep
+
+# Local package manager noise
+.pnpm-store/
+.npm/
+.yarn/
+
+# Local security tooling binaries
+tools/gitleaks/

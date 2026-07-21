@@ -1,0 +1,3 @@
+{$DOMAIN} {
+    import xray_routes
+}
