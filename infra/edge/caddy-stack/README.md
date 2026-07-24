@@ -18,5 +18,7 @@ This directory contains the shared Caddy ingress layer for edge stacks under `in
 - `main-domain.caddy`
 - `second-domain.caddy`
 - `third-domain.caddy`
+- `fourth-domain.caddy`
 - `second-domain.caddy.example`
 - `third-domain.caddy.example`
+- `fourth-domain.caddy.example`
