@@ -1,0 +1,72 @@
+# CLIProxyAPI domain. Replace hostname before use.
+codex.cepheus.live {
+    log {
+        level {$CADDY_LOG_LEVEL}
+    }
+
+    @root_path {
+        path /
+    }
+
+    @management_related {
+        path /console /console/ /management.html /v0/management* /v0/resource/plugins*
+    }
+
+    @v1_missing_auth {
+        path /v1*
+        not header Authorization *
+        not header X-Api-Key *
+        not header X-API-Key *
+        not header X-Goog-Api-Key *
+    }
+
+    @v0_missing_auth {
+        path /v0*
+        not header Authorization *
+    }
+
+    route {
+        handle @management_related {
+            reverse_proxy 127.0.0.1:9090 {
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
+                header_up User-Agent {header.User-Agent}
+                header_up Host {host}
+                header_up X-Original-URI {uri}
+            }
+        }
+
+        handle @root_path {
+            root * /var/www/main
+            file_server
+            try_files {path} /index.html
+        }
+
+        handle @v1_missing_auth {
+            reverse_proxy 127.0.0.1:9090 {
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
+                header_up User-Agent {header.User-Agent}
+                header_up Host {host}
+                header_up X-Original-URI {uri}
+            }
+        }
+
+        handle @v0_missing_auth {
+            reverse_proxy 127.0.0.1:9090 {
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
+                header_up User-Agent {header.User-Agent}
+                header_up Host {host}
+                header_up X-Original-URI {uri}
+            }
+        }
+
+        reverse_proxy 127.0.0.1:8317 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+}

@@ -4,7 +4,7 @@ This directory contains a full, runnable reference layout for the staged archite
 
 ## Architecture
 
-- Edge TLS and routing: Caddy on port 443
+- Shared edge TLS and routing: Caddy under `infra/edge/caddy-stack` on port 443
 - Proxy backend: Xray VLESS + XHTTP on `127.0.0.1:8080`
 - Unauthorized traffic: local honeypot static site
 - Optional scanner sink: micro-tarpit on `127.0.0.1:9090`
@@ -15,13 +15,6 @@ This directory contains a full, runnable reference layout for the staged archite
 edge-gateway-stack/
   docker-compose.yml
   .env.example
-  caddy/
-    Caddyfile
-    snippets/
-      xray-routes.caddy
-    sites/
-      main-domain.caddy
-      second-domain.example.caddy
   xray/
     server-config.json
     client-config.json
@@ -43,6 +36,18 @@ edge-gateway-stack/
     test-routing.ps1
   systemd/
     xray-compose.service
+
+infra/edge/caddy-stack/
+  docker-compose.yml
+  Caddyfile
+  snippets/
+    xray-routes.caddy
+  sites/
+    main-domain.caddy
+    second-domain.caddy
+    third-domain.caddy
+    second-domain.caddy.example
+    third-domain.caddy.example
 ```
 
 ## 1) Fill Environment Variables
@@ -111,7 +116,7 @@ Runtime note:
 - Docker uses `xray/output/server-config.json` as the live server config mount.
 - You can re-run rendering after editing `.env` without modifying template files.
 
-Note: Caddy files use Caddy runtime placeholders in the form `{$VAR}` and are resolved inside the Caddy container from environment variables.
+Note: Caddy files use Caddy runtime placeholders in the form `{$VAR}` and are resolved inside the shared Caddy container from environment variables.
 
 ## 3) Pre-deployment Cleanup (Old Local Services)
 
@@ -164,6 +169,12 @@ Expected result before new deployment:
 ## 4) Start Services
 
 ```bash
+# Start shared ingress (Caddy + tarpit)
+cd ../caddy-stack
+docker compose up -d
+
+# Start xray backend
+cd ../edge-gateway-stack
 docker compose up -d
 ```
 
@@ -196,16 +207,16 @@ Or use the included PowerShell helper:
 
 ### Caddy log files
 
-This stack writes Caddy logs to files mounted from the host:
+The shared `caddy-stack` writes Caddy logs to files mounted from the host:
 
-- Access log: `./log/caddy/access.log`
-- Runtime/error log: `./log/caddy/error.log`
+- Access log: `../caddy-stack/log/access.log`
+- Runtime/error log: `../caddy-stack/log/error.log`
 
 Useful commands on server:
 
 ```bash
-tail -f ./log/caddy/access.log
-tail -f ./log/caddy/error.log
+tail -f ../caddy-stack/log/access.log
+tail -f ../caddy-stack/log/error.log
 ```
 
 ## 7) Tarpit Telemetry Collection
@@ -267,7 +278,7 @@ sudo systemctl stop xray-compose.service
 
 ## 9) Add Another Domain
 
-1. Create a new site file under `caddy/sites/`, for example `caddy/sites/example-two.com.caddy`.
+1. Create a new site file under `../caddy-stack/caddy/sites/`, for example `../caddy-stack/caddy/sites/example-two.com.caddy`.
 2. Add a site block and import the shared routes snippet:
 
 ```caddy
@@ -284,9 +295,9 @@ docker compose up -d
 
 Static-only domain option:
 
-- Use `caddy/sites/second-domain.example.caddy` as a template.
+- Use `../caddy-stack/caddy/sites/second-domain.caddy.example` as a template.
 - Place site files in `static-second-domain/`.
-- This directory is mounted to `/var/www/second-domain` in Caddy.
+- This directory is mounted to `/var/www/second` in Caddy.
 
 ## 10) Optional Phase 2 (REALITY Local Fallback)
 

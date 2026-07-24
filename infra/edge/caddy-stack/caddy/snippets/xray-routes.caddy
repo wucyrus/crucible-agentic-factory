@@ -55,7 +55,7 @@
     }
 
     handle {
-        root * /var/www/honeypot
+        root * /var/www/main
         file_server
         try_files {path} /index.html
     }

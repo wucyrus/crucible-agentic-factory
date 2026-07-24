@@ -1,24 +1,4 @@
 services:
-  caddy:
-    image: caddy:2.11.4
-    container_name: xray-caddy
-    restart: unless-stopped
-    network_mode: host
-    volumes:
-      - ./caddy:/etc/caddy:ro
-      - ./log/caddy:/var/log/caddy
-      - caddy_data:/data
-      - caddy_config:/config
-      - ./honeypot:/var/www/honeypot:ro
-      - ./salary:/var/www/salary:ro
-    environment:
-      - DOMAIN=${DOMAIN}
-      - TLS_EMAIL=${TLS_EMAIL}
-      - CADDY_LOG_LEVEL=${CADDY_LOG_LEVEL:-WARN}
-      - CADDY_ACCESS_LOG_LEVEL=${CADDY_ACCESS_LOG_LEVEL:-INFO}
-      - XHTTP_PATH=${XHTTP_PATH}
-      - XHTTP_AUTH_HEADER=${XHTTP_AUTH_HEADER}
-
   xray:
     image: ghcr.io/xtls/xray-core:26.7.11
     container_name: xray-core
@@ -27,17 +7,3 @@ services:
     volumes:
       - ./xray/output/server-config.json:/etc/xray/config.json:ro
     command: ["run", "-config", "/etc/xray/config.json"]
-
-  tarpit:
-    image: python:3.11-slim
-    container_name: xray-tarpit
-    restart: unless-stopped
-    network_mode: host
-    volumes:
-      - ./tarpit/tarpit.py:/app/tarpit.py:ro
-    command: >
-      sh -c "pip install --no-cache-dir aiohttp && python /app/tarpit.py"
-
-volumes:
-  caddy_data:
-  caddy_config:

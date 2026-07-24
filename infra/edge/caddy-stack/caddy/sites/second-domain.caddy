@@ -1,10 +1,10 @@
 # Static-only second domain. Replace hostname before use.
-second.example.com {
+salary.cepheus.live {
 	log {
 		level {$CADDY_LOG_LEVEL}
 	}
 
-	root * /var/www/second-domain
+	root * /var/www/second
 	file_server
 	try_files {path} /index.html
 }

@@ -1,0 +1,11 @@
+Host cliproxy-edge
+	HostName your.server.domain.or.ip
+	User your-user
+	Port 22
+	IdentityFile ~/.ssh/your_private_key
+	IdentitiesOnly yes
+	ServerAliveInterval 30
+	ServerAliveCountMax 3
+	ExitOnForwardFailure yes
+	LocalForward 8317 127.0.0.1:8317
+	LocalForward 18080 127.0.0.1:18080

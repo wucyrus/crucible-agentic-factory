@@ -1,0 +1,39 @@
+services:
+  cli-proxy-api:
+    image: ${CLI_PROXY_IMAGE:-eceasy/cli-proxy-api:latest}
+    container_name: cli-proxy-api
+    pull_policy: always
+    environment:
+      DEPLOY: ${DEPLOY:-}
+    ports:
+      - "127.0.0.1:8317:8317"
+      - "127.0.0.1:8316:8316"
+      - "127.0.0.1:1455:1455"
+      - "127.0.0.1:54545:54545"
+      - "127.0.0.1:51121:51121"
+    volumes:
+      - ./config.yaml:/CLIProxyAPI/config.yaml
+      - ./auths:/root/.cli-proxy-api
+      - ./logs:/CLIProxyAPI/logs
+    restart: unless-stopped
+    networks:
+      - cpa-network
+
+  cpa-usage-keeper:
+    image: ${CPA_USAGE_KEEPER_IMAGE:-ghcr.io/willxup/cpa-usage-keeper:latest}
+    container_name: cpa-usage-keeper
+    pull_policy: always
+    depends_on:
+      - cli-proxy-api
+    ports:
+      - "127.0.0.1:${KEEPER_HOST_PORT:-18080}:8080"
+    env_file:
+      - .env
+    volumes:
+      - ./keeper:/data
+    restart: unless-stopped
+    networks:
+      - cpa-network
+networks:
+  cpa-network:
+    driver: bridge
