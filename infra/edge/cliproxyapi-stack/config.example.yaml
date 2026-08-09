@@ -61,8 +61,8 @@ quota-exceeded:
   antigravity-credits: true
 routing:
   strategy: "round-robin"
-  session-affinity: false
-  session-affinity-ttl: "1h"
+  session-affinity: true
+  session-affinity-ttl: "24h"
 codex:
   identity-confuse: false
 ws-auth: true

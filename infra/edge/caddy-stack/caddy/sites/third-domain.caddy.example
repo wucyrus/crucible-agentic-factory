@@ -8,8 +8,9 @@ third.example.com {
         path /
     }
 
-    @management_related {
-        path /console /console/ /management.html /v0/management* /v0/resource/plugins*
+    @allowed_paths {
+        path /v1/*
+        path /v0/management/usage
     }
 
     @v1_missing_auth {
@@ -26,20 +27,19 @@ third.example.com {
     }
 
     route {
-        handle @management_related {
-            reverse_proxy 127.0.0.1:9090 {
-                header_up X-Real-IP {remote_host}
-                header_up X-Forwarded-For {remote_host}
-                header_up User-Agent {header.User-Agent}
-                header_up Host {host}
-                header_up X-Original-URI {uri}
-            }
-        }
-
         handle @root_path {
             root * /var/www/honeypot
             file_server
             try_files {path} /index.html
+        }
+
+        handle @allowed_paths {
+            reverse_proxy 127.0.0.1:8317 {
+                header_up Host {host}
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
+                header_up X-Forwarded-Proto {scheme}
+            }
         }
 
         handle @v1_missing_auth {
@@ -62,11 +62,14 @@ third.example.com {
             }
         }
 
-        reverse_proxy 127.0.0.1:8317 {
-            header_up Host {host}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-For {remote_host}
-            header_up X-Forwarded-Proto {scheme}
+        handle {
+            reverse_proxy 127.0.0.1:9090 {
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
+                header_up User-Agent {header.User-Agent}
+                header_up Host {host}
+                header_up X-Original-URI {uri}
+            }
         }
     }
 }
