@@ -81,20 +81,95 @@ untrusted content into the script text.
 convenience value for the validation script — it is never itself uploaded; only the
 file's contents become `APPLE_CERTIFICATE`.
 
-## Workflow: rotating or setting up a certificate
+## Workflow: creating a certificate from scratch
 
-1. Export/obtain the Developer ID Application cert + private key (Apple Developer
-   portal, or Keychain Access "Certificate Assistant").
-2. Put the cert, key, and a `.env` (see table above) in one local working folder —
-   never commit it to a repo.
-3. Run `tools/apple-codesign/validate-certs.sh` against that folder. It reproduces
-   the exact CI PKCS12/MAC check locally and flags a modern-format PKCS12 before it
-   ever reaches CI.
-4. If flagged, run `reexport-legacy.sh` and re-validate.
-5. Upload secrets via `gh secret set NAME --repo owner/repo < file` or
-   `--body "$VALUE"` (piped stdin, not PowerShell `<` redirection — that operator
-   isn't implemented for external commands and silently no-ops).
-6. Re-run the CI signing job.
+All steps run in any OpenSSL 3.x shell (Git Bash on Windows, macOS/Linux Terminal —
+no Xcode or Keychain Access required). Do the work in one local, never-committed
+folder.
+
+1. **Generate a private key** (kept forever — never re-generate for renewals, only
+   for a brand-new identity):
+
+   ```bash
+   openssl genrsa -out dev-id.key 2048
+   ```
+
+2. **Generate a CSR** (Certificate Signing Request) from that key:
+
+   ```bash
+   openssl req -new -key dev-id.key -out dev-id.csr \
+     -subj "/emailAddress=you@example.com/CN=Your Name/C=US"
+   ```
+
+3. **Upload the CSR to Apple** and download the signed cert:
+   [developer.apple.com/account/resources/certificates](https://developer.apple.com/account/resources/certificates)
+   → **+** → **Developer ID Application** → upload `dev-id.csr` → download as
+   `developerID_application.cer` (DER-encoded, not PEM).
+
+4. **Convert the downloaded `.cer` (DER) to PEM**:
+
+   ```bash
+   openssl x509 -inform DER -in developerID_application.cer -out developerID_application.pem
+   ```
+
+5. **Export as PKCS12 — directly in legacy format**, combining the private key and
+   cert. Doing `-legacy` at export time avoids the re-export step in the PKCS12-format
+   lesson above entirely:
+
+   ```bash
+   openssl pkcs12 -export -legacy \
+     -inkey dev-id.key -in developerID_application.pem \
+     -out developerID_application.p12 \
+     -name "Developer ID Application: Your Name (TEAMID)" \
+     -passout pass:"$APPLE_CERTIFICATE_PASSWORD"
+   ```
+
+   (Equivalent to running [`reexport-legacy.sh`](../../tools/apple-codesign/reexport-legacy.sh)
+   `dev-id.key developerID_application.pem developerID_application.p12 "$APPLE_CERTIFICATE_PASSWORD"`.)
+
+6. **Base64-encode the `.p12`** for the GitHub secret (single line, no wrapping):
+
+   ```bash
+   base64 -w0 developerID_application.p12 > developerID_application.p12.b64   # Linux/Git Bash
+   base64 -i developerID_application.p12 -o developerID_application.p12.b64   # macOS (no -w0)
+   ```
+
+7. **Write a local `.env`** (see the required-secrets table above) pointing
+   `APPLE_CERTIFICATE_PATH` at `./developerID_application.p12.b64`, then run
+   [`tools/apple-codesign/validate-certs.sh`](../../tools/apple-codesign/validate-certs.sh)
+   against it. It reproduces the exact CI PKCS12/MAC check locally, confirms the
+   legacy format, and checks the cert subject/expiry.
+
+8. **Upload as GitHub secrets**:
+
+   ```bash
+   gh secret set APPLE_CERTIFICATE --repo owner/repo < developerID_application.p12.b64
+   gh secret set APPLE_CERTIFICATE_PASSWORD --repo owner/repo --body "$APPLE_CERTIFICATE_PASSWORD"
+   gh secret set KEYCHAIN_PASSWORD --repo owner/repo --body "$KEYCHAIN_PASSWORD"
+   gh secret set APPLE_ID --repo owner/repo --body "$APPLE_ID"
+   gh secret set APPLE_PASSWORD --repo owner/repo --body "$APPLE_PASSWORD"
+   gh secret set APPLE_TEAM_ID --repo owner/repo --body "$APPLE_TEAM_ID"
+   ```
+
+   Use piped stdin (`< file` in bash, or `Get-Content file -Raw | gh secret set ...`
+   in PowerShell) for `APPLE_CERTIFICATE` — PowerShell's `<` redirection operator
+   isn't implemented for external commands and silently no-ops instead of erroring.
+
+9. Re-run the CI signing job.
+
+`APPLE_TEAM_ID` is on the Apple Developer portal under **Membership** (or
+`developer.apple.com/account` → top-right team name). `APPLE_PASSWORD` is an
+app-specific password generated at [appleid.apple.com](https://appleid.apple.com)
+→ Sign-In and Security → App-Specific Passwords (not your Apple ID login password).
+
+## Workflow: rotating an existing certificate
+
+Skip straight to re-exporting if the private key + cert are still on hand (nothing
+to re-upload to Apple):
+
+1. Locate the existing `dev-id.key` and `developerID_application.pem`/`.cer`.
+2. Repeat steps 4–9 above (convert if still DER, export PKCS12, base64-encode,
+   validate, upload).
 
 ## Diagnosing a fresh failure
 
