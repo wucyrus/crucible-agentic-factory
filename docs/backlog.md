@@ -72,6 +72,7 @@ Acceptance criteria:
 - The new service has an isolated route and health check.
 - Edge routing can reverse proxy to the service without breaking the Xray flow.
 - Config changes do not leak between runtimes.
+- OAuth credentials and installed provider plugins survive container recreation.
 
 ### R-007 Control Plane UI
 
