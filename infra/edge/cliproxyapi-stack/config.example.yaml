@@ -33,9 +33,11 @@ pprof:
   enable: false
   addr: "127.0.0.1:8316"
 
+# Native provider plugins are persisted by docker-compose under /CLIProxyAPI/plugins.
+# Keep this enabled so optional providers can be installed without rebuilding the image.
 plugins:
-  enabled: false
-  dir: "plugins"
+  enabled: true
+  dir: "/CLIProxyAPI/plugins"
 
 commercial-mode: false
 logging-to-file: true
