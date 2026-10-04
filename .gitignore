@@ -31,6 +31,17 @@ infra/edge/edge-gateway-stack/tarpit-events.csv
 infra/edge/edge-gateway-stack/xray/output/*.json
 !infra/edge/edge-gateway-stack/xray/output/.gitkeep
 
+# CLIProxyAPI runtime state and credentials
+infra/edge/cliproxyapi-stack/config.yaml
+infra/edge/cliproxyapi-stack/auths/*
+!infra/edge/cliproxyapi-stack/auths/.gitkeep
+infra/edge/cliproxyapi-stack/logs/*
+!infra/edge/cliproxyapi-stack/logs/.gitkeep
+infra/edge/cliproxyapi-stack/keeper/*
+!infra/edge/cliproxyapi-stack/keeper/.gitkeep
+infra/edge/cliproxyapi-stack/plugins/*
+!infra/edge/cliproxyapi-stack/plugins/.gitkeep
+
 # Local package manager noise
 .pnpm-store/
 .npm/
